@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orta Doğu Haberleri Chatbot</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #381a1a;
+        }
+
+        #chat-container {
+            width: 90%;
+            max-width: 800px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 80%;
+        }
+
+        #header {
+            background: linear-gradient(to right, #fc6039, #471717);
+            padding: 15px;
+            color: white;
+            text-align: center;
+            font-size: 24px;
+            border-radius: 10px 10px 0 0;
+        }
+
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            margin: 20px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #fafafa;
+        }
+
+        .message {
+            margin: 10px 0;
+            padding: 10px 15px;
+            border-radius: 15px;
+            max-width: 70%;
+        }
+
+        .user {
+            align-self: flex-end;
+            background: #d1e7ff;
+            color: #333;
+        }
+
+        .bot {
+            white-space: pre-wrap;
+            align-self: flex-start;
+            background: #ffefe0;
+            color: #333;
+        }
+
+        #soru-kutu {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #soru {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        #gonder {
+            background: #612222;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        #gonder:hover {
+            background: #feb47b;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="header">
+            📰 Orta Doğu Haberleri Sohbet Botu
+        </div>
+        <div id="messages"></div>
+        <div id="soru-kutu">
+            <textarea id="soru" placeholder="Cnn International'dan Orta Doğu ile ilgili son gelişmeler için sor..." rows="2"></textarea>
+            <button id="gonder">Gönder</button>
+        </div>
+    </div>
+
+    <script>
+        const messagesDiv = document.getElementById('messages');
+        const questionInput = document.getElementById('soru');
+        const gonderButton = document.getElementById('gonder');
+
+        gonderButton.addEventListener('click', async () => {
+            const question = questionInput.value.trim();
+            questionInput.value = '';
+            if (!question) return;
+
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user';
+            userMessage.textContent = question;
+            messagesDiv.appendChild(userMessage);
+
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            const response = await fetch('/sor', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question })
+            });
+
+            const data = await response.json();
+            const botMessage = document.createElement('div');
+
+            botMessage.className = 'message bot';
+            botMessage.innerHTML = (data.answer || data.error || 'Error occurred.').replace(/\n/g, '<br>');
+            messagesDiv.appendChild(botMessage);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            questionInput.value = '';
+        });
+    </script>
+</body>
+</html>
